@@ -1,3 +1,4 @@
+# Task 9.1
 from sqlalchemy.types import String, Integer, Float
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, declared_attr
 from app.config import config
