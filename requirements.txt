@@ -1,6 +1,7 @@
 alembic==1.13.3
-sqlalchemy==2.0.35
+sqlalchemy>=2.0
 pydantic==2.9.2
-fastapi==0.115.0
-uvicorn==0.32.0
+fastapi[all]
+uvicorn[standart]
 python-dotenv==1.0.1
+pytest

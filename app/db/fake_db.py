@@ -22,3 +22,11 @@ def get_product(id: int) -> ProductResponse:
         if product.id == id:
             return product
     return None
+
+def deleteProduct(id: int) -> ProductResponse:
+    for product in products:
+        if product.id == id:
+            result = product
+            products.remove(product)
+            return result
+    return None

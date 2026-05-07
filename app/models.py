@@ -9,12 +9,12 @@ class ProductBase(BaseModel):
     description: str
 
 class ProductResponse(ProductBase):
-    id: int
+    id: int = Field(ge=0)
 
 class ProductPost(ProductBase):
     pass
 
-class ExceptionGetProductModel(BaseModel):
+class ExceptionNotFoundProductModel(BaseModel):
     status_code: int
     detail: str
     product_id: int 
@@ -24,7 +24,7 @@ class ExceptionPostProductModel(BaseModel):
     detail: str
     product: ProductPost 
 
-class ExceptionGetProduct(HTTPException):
+class ExceptionNotFoundProduct(HTTPException):
     def __init__(self, status_code: int, detail: str, product_id: int):
         super().__init__(status_code=status_code, detail=detail)
         self.product_id = product_id
@@ -33,3 +33,4 @@ class ExceptionPostProduct(HTTPException):
     def __init__(self, status_code: int, detail: str, product: ProductPost):
         super().__init__(status_code=status_code, detail=detail)
         self.product = product
+

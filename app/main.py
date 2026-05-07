@@ -2,15 +2,16 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from app.db.fake_db import products, get_product
-from app.models import ProductResponse, ProductPost, ExceptionGetProduct, ExceptionPostProduct, ExceptionGetProductModel, ExceptionPostProductModel
+from pydantic import Field
+from app.db.fake_db import products, get_product, deleteProduct
+from app.models import ProductResponse, ProductPost, ExceptionNotFoundProduct, ExceptionPostProduct, ExceptionNotFoundProductModel, ExceptionPostProductModel
 
 app = FastAPI()
 
 #task 10.1
-@app.exception_handler(ExceptionGetProduct)
-async def exception_get_prod_handler(request: Request, exc: ExceptionGetProduct) -> JSONResponse:
-    error = jsonable_encoder(ExceptionGetProductModel(status_code=exc.status_code, detail=exc.detail, product_id=exc.product_id))
+@app.exception_handler(ExceptionNotFoundProduct)
+async def exception_get_prod_handler(request: Request, exc: ExceptionNotFoundProduct) -> JSONResponse:
+    error = jsonable_encoder(ExceptionNotFoundProductModel(status_code=exc.status_code, detail=exc.detail, product_id=exc.product_id))
     return JSONResponse(status_code=exc.status_code, content=error)
 
 @app.exception_handler(ExceptionPostProduct)
@@ -34,13 +35,13 @@ async def exception_validation_handler(request: Request, exc: RequestValidationE
     description="The endpoint returns product by ID.",
     responses={
         status.HTTP_200_OK: {'model': ProductResponse},
-        status.HTTP_404_NOT_FOUND: {'model': ExceptionGetProductModel},
+        status.HTTP_404_NOT_FOUND: {'model': ExceptionNotFoundProductModel},
     },
 )
 async def read_item(product_id: int):
     product = get_product(product_id)
     if product is None:
-        raise ExceptionGetProduct(status_code=404, detail='Product Not Found', product_id=product_id)
+        raise ExceptionNotFoundProduct(status_code=404, detail='Product Not Found', product_id=product_id)
     return product
 
 @app.post(
@@ -67,3 +68,20 @@ async def create_item(product: ProductPost):
     )
     products.append(product_in_db)
     return product_in_db
+
+@app.delete(
+    "/products/{product_id}",
+    response_model=None,
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete Product by ID.",
+    description="The endpoint deletes product by ID.",
+    responses={
+        status.HTTP_204_NO_CONTENT: {'model': None},
+        status.HTTP_404_NOT_FOUND: {'model': ExceptionNotFoundProductModel},
+    },
+)
+async def delete_item(product_id: int):
+    product = deleteProduct(product_id)
+    if product is None:
+        raise ExceptionNotFoundProduct(status_code=404, detail='Deleting Attempt Failed: Product Not Found', product_id=product_id)
+    return None
